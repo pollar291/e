@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница Заявок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #carList {
+            margin: 20px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .car {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+        }
+
+        .car:last-child {
+            border-bottom: none;
+        }
+
+        #message {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        @media (max-width: 600px) {
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Мои Заявки</h1>
+    <div id="carList"></div>
+    <div id="message"></div>
+
+    <div class="navigation">
+        <button onclick="window.location.href='main1.html'">Создать новую заявку</button>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('authData') ? JSON.parse(localStorage.getItem('authData')).token : null;
+
+        const fetchCars = async () => {
+            const response = await fetch('http://localhost:3000/cars', {
+                method: 'GET',
+                headers: {
+                    'token': token,
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                displayCars(data.cars);
+            } else {
+                document.getElementById('message').textContent = 'Ошибка получения списка заявок.';
+            }
+        };
+
+        const displayCars = (cars) => {
+            const carList = document.getElementById('carList');
+            carList.innerHTML = '';
+
+            if (cars.length === 0) {
+                carList.textContent = 'Нет заявок.';
+                return;
+            }
+
+            cars.forEach(car => {
+                const carDiv = document.createElement('div');
+                carDiv.className = 'car';
+                carDiv.textContent = `${car.name} - Проблема: ${car.problem} - Статус: ${car.status} - Дата: ${car.date}`;
+                carList.appendChild(carDiv);
+            });
+        };
+
+        fetchCars(); 
+    </script>
+</body>
+</html>

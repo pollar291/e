@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница Заявок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        .car {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        #addCarForm {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+        }
+        input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #message {
+            color: red;
+            margin-top: 10px;
+        }
+        .navigation {
+            margin-top: 20px;
+            width: 100%;
+        }
+        .navigation button {
+            background-color: #28a745;
+        }
+        .navigation button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Создать новую заявку</h1>
+    <div id="message"></div>
+    <form id="addCarForm">
+        <label for="carName">Название автомобиля:</label>
+        <input type="text" id="carName" required>
+        <label for="problem">Проблема:</label>
+        <input type="text" id="problem" required>
+        <label for="date">Дата:</label>
+        <input type="date" id="date" required>
+        <label for="time">Время:</label>
+        <input type="time" id="time" required>
+        <button type="submit">Отправить заявку</button>
+    </form>
+
+    <div class="navigation">
+        <button onclick="window.location.href='main2.html'">Перейти к заявкам</button>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('authData') ? JSON.parse(localStorage.getItem('authData')).token : null;
+
+        document.getElementById('addCarForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('carName').value;
+            const problem = document.getElementById('problem').value;
+            const date = document.getElementById('date').value + ' ' + document.getElementById('time').value;
+
+            const response = await fetch('http://localhost:3000/car', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': token,
+                },
+                body: JSON.stringify({ name, problem, date })
+            });
+
+            const messageDiv = document.getElementById('message');
+            if (response.ok) {
+                messageDiv.textContent = 'Заявка успешно создана!';
+                document.getElementById('addCarForm').reset(); 
+            } else {
+                const data = await response.json();
+                messageDiv.textContent = data.message || 'Ошибка при создании заявки.';
+            }
+        });
+    </script>
+</body>
+</html>

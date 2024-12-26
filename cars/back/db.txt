@@ -1,0 +1,28 @@
+CREATE TABLE "users" (
+  "id" SERIAL NOT NULL,
+  "login" VARCHAR(255) NOT NULL,
+  "password" VARCHAR(255) NOT NULL,
+  "email" VARCHAR(255) NOT NULL,
+  "phone" VARCHAR(255) NOT NULL,
+  "full_name" VARCHAR(255) NOT NULL,
+  "role" VARCHAR(255) NOT NULL,
+  PRIMARY KEY ("id")
+);
+
+CREATE TABLE "sessions" (
+  "uuid" UUID NOT NULL,
+  "user_id" INTEGER NOT NULL,
+  PRIMARY KEY ("uuid"),
+  CONSTRAINT "session_to_user" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE "cars" (
+  "id" SERIAL NOT NULL,
+  "name" VARCHAR(255) NOT NULL,
+  "problem" VARCHAR(255) NOT NULL,
+  "date" DATE NOT NULL,
+  "status" VARCHAR(255) NOT NULL,
+  "user_id" INTEGER NOT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "car_to_user" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
+);

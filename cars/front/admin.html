@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+        }
+
+        .status select {
+            margin-left: 5px;
+        }
+
+        .message {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Панель администратора</h1>
+    <table id="carsTable">
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Телефон</th>
+                <th>Дата и время бронирования</th>
+                <th>Автомобиль</th>
+                <th>Описание поломки</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="message" id="message"></div>
+    <button id="logoutButton">Выйти</button>
+
+    <script>
+        const adminLogin = 'newfit';
+        const adminPassword = 'qsw123';
+        let token = null;
+
+        const authenticateAdmin = () => {
+            const inputLogin = prompt('Введите логин:');
+            const inputPassword = prompt('Введите пароль:');
+
+            if (inputLogin === adminLogin && inputPassword === adminPassword) {
+                return true;
+            } else {
+                alert('Неверные учетные данные');
+                return false;
+            }
+        };
+
+        const fetchCars = async () => {
+            const response = await fetch('http://localhost:3000/admin/cars', {
+                method: 'GET',
+                headers: {
+                    'token': token,
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                displayCars(data.result);
+            } else {
+                document.getElementById('message').textContent = 'Ошибка получения заявок.';
+            }
+        };
+
+        const displayCars = (cars) => {
+            const tbody = document.getElementById('carsTable').querySelector('tbody');
+            tbody.innerHTML = '';
+
+            cars.forEach(car => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${car.full_name}</td>
+                    <td>${car.phone}</td>
+                    <td>${new Date(car.date).toLocaleString()}</td>
+                    <td>${car.name}</td>
+                    <td>${car.problem}</td>
+                    <td>${car.status}</td>
+                    <td class="status">
+                        ${car.status === 'новое' ? `
+                            <select onchange="updateCarStatus('${car.id}', this.value)">
+                                <option value="" disabled selected>Сменить статус</option>
+                                <option value="подтверждено">Подтверждено</option>
+                                <option value="отклонено">Отклонено</option>
+                            </select>
+                        ` : '—'}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        };
+
+        const updateCarStatus = async (id, status) => {
+            const response = await fetch(`http://localhost:3000/admin/car/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': token,
+                },
+                body: JSON.stringify({ status }),
+            });
+
+            if (response.ok) {
+                fetchCars(); 
+            } else {
+                const result = await response.json();
+                document.getElementById('message').textContent = result.message;
+            }
+        };
+
+        const logout = () => {
+            token = null;
+            alert('Вы вышли из системы');
+            window.location.href = 'main1.html'; 
+        };
+
+        document.getElementById('logoutButton').addEventListener('click', logout);
+    </script>
+</body>
+
+</html>
